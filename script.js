@@ -22,12 +22,22 @@ const preBtn = document.querySelector("#pre-btn");
 const range = document.querySelector("#music-time");
 const musicCover = document.querySelector("#music-cover");
 const musicName = document.querySelector("#music-name");
+let currentMusic = 0 
+let currentTime = 0
+const savedMusic = localStorage.getItem('currentMusic');
+const savedTime = localStorage.getItem('currentTime');
 
-let currentMusic = 0 ;
+if (savedMusic !== null) {
+    currentMusic = parseInt(savedMusic, 10);
+    currentTime = parseFloat(savedTime);
+}
 
 let audio = musics[currentMusic].audio;
+audio.currentTime = currentTime;
 musicCover.src = musics[currentMusic].cover;
 musicName.innerText = musics[currentMusic].name;
+
+
 
 audio.addEventListener('canplay' , ()=>{
     range.max = audio.duration;
@@ -35,11 +45,11 @@ audio.addEventListener('canplay' , ()=>{
 
 audio.addEventListener('timeupdate' , ()=>{
     range.value = audio.currentTime;
+    saveState();
 })
 
 range.addEventListener('input' , ()=>{
     audio.currentTime = range.value;
-
 })
 
 playBtn.addEventListener('click' , ()=>{
@@ -62,11 +72,12 @@ preBtn.addEventListener('click' , ()=>{
 })
 
 function changeMusic(state){
+
     audio.pause();
+    audio.currentTime = 0 ;
     range.value = 0;
     playBtn.classList.replace("fa-pause" , "fa-play");
     musicCover.style.animationPlayState = 'paused';
-    audio.currentTime = 0 ;
     if(state == 'next'){
         if(currentMusic == musics.length - 1){
             currentMusic = 0 ;
@@ -83,4 +94,14 @@ function changeMusic(state){
     audio = musics[currentMusic].audio;
     musicCover.src = musics[currentMusic].cover;
     musicName.innerText = musics[currentMusic].name;
+
+    audio.play();
+    saveState();
 }
+
+function saveState() {
+    localStorage.setItem('currentMusic', currentMusic);
+    localStorage.setItem('currentTime', audio.currentTime);
+}
+
+
